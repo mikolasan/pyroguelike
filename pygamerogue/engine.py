@@ -7,7 +7,7 @@ class Engine:
         pygame.init()
         pygame.font.init()
         self.size = screen_size
-        flags = pygame.FULLSCREEN
+        flags = 0 #pygame.FULLSCREEN
         self.screen = pygame.display.set_mode(screen_size, flags)
         self.scenes = {}
 

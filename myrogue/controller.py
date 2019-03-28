@@ -1,6 +1,5 @@
 import math
 import pygame
-from pdb_clone import pdb
 from pygame.transform import rotate
 
 
@@ -25,7 +24,7 @@ def rot_center2(image, rect, angle):
 class BallController:
     def __init__(self, objects):
         self.ball = objects[0]
-        self.tile = objects[1]
+        self.tiles = objects[1]
         self.speed = [2, 2]
         self.reset()
 
@@ -51,12 +50,7 @@ class BallController:
                     angle = (math.pi / 2.) if y < c_y else (-math.pi / 2.)
                 elif x < c_x:
                     angle = math.pi + math.atan((c_y - y) / (x - c_x))
-                self.ball.angle = math.degrees(angle)
-                print(
-                    event.pos,
-                    self.ballrect.center,
-                    math.degrees(self.ball.angle)
-                    )
+                self.ball.angle = -90 + math.degrees(angle)
 
     def update(self, events):
         self.process_input(events)
@@ -86,4 +80,5 @@ class BallController:
 
     def draw(self, screen):
         screen.blit(self.ball.image, self.ball.rect)
-        self.tile.draw(screen)
+        for tile in self.tiles:
+            tile.draw(screen)
