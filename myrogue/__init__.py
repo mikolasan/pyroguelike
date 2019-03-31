@@ -1,1 +1,1 @@
-__all__ = ['TestGame', 'BallController']
+__all__ = ['TestGame', 'ActionController']

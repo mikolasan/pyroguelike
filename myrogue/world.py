@@ -8,6 +8,7 @@ world = """
 ----------
 """
 
+
 def get_world():
     a = []
     for line in world.splitlines():

@@ -1,26 +1,41 @@
 import pygame
 
 
+rogue_size = (48, 48)
+
+
+def map_to_pixel(x, y):
+    return x * rogue_size[0], y * rogue_size[1]
+
+
 class Tile:
-    def __init__(self, size, pos, background_color, border_color, symbol, padding, text_color):
+    def __init__(self, size, map_pos, pos, background_color, border_color, symbol, padding, text_color):
         self.size = size
-        self.position = pos
+        if map_pos is not None:
+            x, y = map_to_pixel(map_pos[0], map_pos[1])
+            self.position = {'x': x, 'y': y}
+        else:
+            self.position = {'x': pos[0], 'y': pos[1]}
         self.background_color = background_color
         self.border_color = border_color
         self.symbol = symbol
         self.text_padding = padding
         self.text_color = text_color
+        self.angle = 0
         self.make_image()
 
     def make_image(self):
-        self.image = pygame.Surface(self.size)
-        self.rect = self.image.get_rect()
-        self.rect.left = self.position[0]
-        self.rect.top = self.position[1]
         self.font = pygame.font.Font('font.ttf', 40)
-        self.image.fill(self.background_color)
         self.rendered_symbol = self.font.render(self.symbol, True, self.text_color)
-        self.image.blit(self.rendered_symbol, self.text_padding)
+        self.original_image = pygame.Surface(self.size)
+        self.original_image.fill(self.background_color)
+        self.original_image.blit(self.rendered_symbol, self.text_padding)
+        self.image = self.original_image
+        self.rect = self.image.get_rect()
+        self.rect.left, self.rect.top = map_to_pixel(self.position['x'], self.position['y'])
+
+    def update(self, events):
+        self.rect.left, self.rect.top = map_to_pixel(self.position['x'], self.position['y'])
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
@@ -78,18 +93,15 @@ TileDB = {
     },
 }
 
-rogue_size = (48, 48)
-
 
 class RogueTile(Tile):
-    def __init__(self, world_pos, tile_id):
+    def __init__(self, map_pos, tile_id):
         preset = TileDB[tile_id]
-        x = world_pos[0] * rogue_size[0]
-        y = world_pos[1] * rogue_size[1]
         Tile.__init__(
             self,
             size=rogue_size,
-            pos=(x, y),
+            map_pos=map_pos,
+            pos=None,
             background_color=preset['background'],
             border_color=preset['border'],
             symbol=preset['symbol'],
