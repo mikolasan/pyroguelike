@@ -13,9 +13,11 @@ class Tile:
         self.size = size
         if map_pos is not None:
             x, y = map_to_pixel(map_pos[0], map_pos[1])
-            self.position = {'x': x, 'y': y}
+            self.pos = {'x': x, 'y': y}
+            self.map_pos = map_pos
         else:
-            self.position = {'x': pos[0], 'y': pos[1]}
+            self.pos = {'x': pos[0], 'y': pos[1]}
+            self.map_pos = (pos[0] // rogue_size[0], pos[1] // rogue_size[1])
         self.background_color = background_color
         self.border_color = border_color
         self.symbol = symbol
@@ -23,6 +25,13 @@ class Tile:
         self.text_color = text_color
         self.angle = 0
         self.make_image()
+
+    def update_map_position(self, map_pos):
+        self.map_pos = map_pos
+        self.pos['x'], self.pos['y'] = map_to_pixel(map_pos[0], map_pos[1])
+
+    def update_rect_position(self):
+        self.rect.left, self.rect.top = self.pos['x'], self.pos['y']
 
     def make_image(self):
         self.font = pygame.font.Font('font.ttf', 40)
@@ -32,10 +41,10 @@ class Tile:
         self.original_image.blit(self.rendered_symbol, self.text_padding)
         self.image = self.original_image
         self.rect = self.image.get_rect()
-        self.rect.left, self.rect.top = map_to_pixel(self.position['x'], self.position['y'])
+        self.update_rect_position()
 
     def update(self, events):
-        self.rect.left, self.rect.top = map_to_pixel(self.position['x'], self.position['y'])
+        self.update_rect_position()
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)

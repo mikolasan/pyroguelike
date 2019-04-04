@@ -18,6 +18,6 @@ class Bullet(Tile):
         self.speed = 5
 
     def update(self, events):
-        self.position['x'] += math.cos(self.angle) * self.speed
-        self.position['y'] -= math.sin(self.angle) * self.speed
+        self.pos['x'] += math.cos(self.angle) * self.speed
+        self.pos['y'] -= math.sin(self.angle) * self.speed
         Tile.update(self, events)

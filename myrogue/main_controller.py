@@ -10,5 +10,3 @@ class MainController:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.engine.stop()
-                elif event.key == pygame.K_r:
-                    self.engine.reset()
