@@ -21,6 +21,6 @@ class GameOver:
     def update(self, events):
         pass
 
-    def draw(self, screen):
+    def draw(self, screen, camera):
         if self.visible:
             screen.blit(self.image, self.image.get_rect())

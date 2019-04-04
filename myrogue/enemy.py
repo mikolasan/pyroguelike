@@ -33,7 +33,7 @@ class Enemy(Tile):
         dy = abs(self.rect.y - self.player.rect.y)
         next_step = random.choice(self.directions)
         if dx <= self.size[0] and dy <= self.size[1]:
-            print('update1', dx, dy)
+            #print('update1', dx, dy)
             self.player.attacked(self.player, self.damage)
             self.last_update = pygame.time.get_ticks()
             return
@@ -87,6 +87,6 @@ class Enemy(Tile):
 
         dx = abs(self.rect.x - self.player.rect.x)
         dy = abs(self.rect.y - self.player.rect.y)
-        print('update2', dx, dy)
+        #print('update2', dx, dy)
         if dx <= self.size[0] and dy <= self.size[1]:
             self.player.attacked(self.player, self.damage)

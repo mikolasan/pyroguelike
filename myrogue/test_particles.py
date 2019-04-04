@@ -32,7 +32,7 @@ class TestParticles(object):
         if self.duration < pg.time.get_ticks() - self.start_time:
             self.over = True
 
-    def draw(self, screen):
+    def draw(self, screen, camera):
         if not self.over:
             self.generator.update(screen, self.tick)
             self.tick = pg.time.get_ticks()

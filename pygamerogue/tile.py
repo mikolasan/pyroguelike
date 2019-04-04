@@ -46,8 +46,8 @@ class Tile:
     def update(self, events):
         self.update_rect_position()
 
-    def draw(self, screen):
-        screen.blit(self.image, self.rect)
+    def draw(self, screen, camera):
+        screen.blit(self.image, camera.applyrect(self.rect))
 
 
 TileDB = {
@@ -59,6 +59,13 @@ TileDB = {
         'padding': [0, 0],
     },
     '|': {
+        'background': (50, 50, 50),
+        'border': (50, 100, 0),
+        'text': (235, 235, 100),
+        'symbol': '|',
+        'padding': [0, 0],
+    },
+    '<': {
         'background': (50, 50, 50),
         'border': (50, 100, 0),
         'text': (235, 235, 100),
@@ -86,7 +93,14 @@ TileDB = {
         'symbol': '!',
         'padding': [0, 0],
     },
-    '?': {
+    '/': {
+        'background': (50, 50, 50),
+        'border': (250, 0, 0),
+        'text': (235, 5, 1),
+        'symbol': '!',
+        'padding': [0, 0],
+    },
+    '+': {
         'background': (50, 50, 50),
         'border': (250, 100, 0),
         'text': (235, 235, 100),
@@ -94,12 +108,20 @@ TileDB = {
         'padding': [0, 0],
     },
     '$': {
-        'background': (0, 250, 0),
+        'background': (10, 250, 10),
         'border': (0, 200, 0),
-        'text': (0, 235, 100),
+        'text': (250, 135, 100),
         'symbol': '$',
         'padding': [0, 0],
     },
+    'e': {
+        'background': (10, 10, 250),
+        'border': (250, 0, 0),
+        'text': (0, 0, 0),
+        'symbol': 'e',
+        'padding': [0, 0],
+    },
+
 }
 
 

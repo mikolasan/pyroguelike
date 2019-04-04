@@ -11,19 +11,9 @@ ENEMY_SPAWN = pygame.USEREVENT
 
 
 class ActionController:
-    def __init__(self, world, objects):
-        self.world = world
-        self.objects = objects
-        self.player = objects['player']
-        self.tiles = objects['tiles']
-        self.enemies = objects['enemies']
-        self.game_over = next(x for x in objects['ui'] if isinstance(x, GameOver))
-        walls = objects['walls']
-        self.walls = []
-        for tile in walls:
-            self.walls.append(tile.rect)
+    def __init__(self):
         self.bullets = []
-        self.ask_new_enemy()
+        #self.ask_new_enemy()
 
     def set_engine(self, engine):
         self.engine = engine
@@ -89,10 +79,11 @@ class ActionController:
         for bullet in self.bullets:
             bullet.update(events)
         self.bullets[:] = (x for x in self.bullets if not (self.test_wall_collision(x.rect) or self.test_enemy_collision(x)))
+        self.camera.update(self.player)
 
-    def draw(self, screen):
+    def draw(self, screen, camera):
         for bullet in self.bullets:
-            bullet.draw(screen)
+            bullet.draw(screen, camera)
 
     def reset(self):
         hp = self.player.healthbar

@@ -32,7 +32,7 @@ class HealthBar:
         #self.bar.set_clip(new_bar_rect)
         #print(self.bar_rect, new_bar_rect)
 
-    def draw(self, screen):
+    def draw(self, screen, camera):
         #print(self.bg_rect, self.bar_rect)
         #screen.blit(self.background, self.bg_rect)
         new_bar_rect = pygame.Rect((0, 0), self.size)

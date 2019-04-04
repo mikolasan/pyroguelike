@@ -1,7 +1,8 @@
 import pygame
-
+from .camera import Camera
 
 GAME_TITLE = 'Not your father\'s roguelike'
+
 
 class Engine:
     def __init__(self, screen_size):
@@ -13,6 +14,7 @@ class Engine:
         self.screen = pygame.display.set_mode(screen_size, flags)
         self.scenes = {}
         self.fps = 60.0
+        self.camera = Camera(lambda: True, screen_size[0], screen_size[1])
 
     def load(self, game):
         game.link(self)
@@ -56,10 +58,10 @@ class Engine:
                 for obj in scene['objects'].values():
                     if type(obj) is list:
                         for o in obj:
-                            o.draw(self.screen)
+                            o.draw(self.screen, self.camera)
                     else:
-                        obj.draw(self.screen)
-                scene['controller'].draw(self.screen)
+                        obj.draw(self.screen, self.camera)
+                scene['controller'].draw(self.screen, self.camera)
         pygame.display.update()
 
     def add_scene(self, name, objects, controller):
