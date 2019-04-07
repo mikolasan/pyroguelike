@@ -1,18 +1,19 @@
 import pygame
-from .action_controller import ActionController
+from .enemy import Enemy
 from .game_over import GameOver
 from .healthbar import HealthBar
-from .enemy import Enemy
-from .world import get_world
-from pygamerogue.tile import RogueTile
-from pygamerogue.camera import Camera
+from .world import World
+from pygamerogue.game_object import GameObject
+
+FLOOR_ID = [1, 2]
 
 
-class TestGame:
+class TestGame(object):
     def __init__(self):
         game_over = GameOver()
         healthbar = HealthBar()
-        player = RogueTile((0, 0), '@')
+        player_image = pygame.image.load('player.png').convert()
+        player = GameObject(player_image, player_image.get_rect())
         player.healthbar = healthbar
 
         def attacked(self, damage):
@@ -25,68 +26,83 @@ class TestGame:
 
         player.attacked = attacked
         player.killed = killed
-        self.world = get_world()
+        world = World()
+        self.map_layer = world.map_layer
+        self.sprite_group = world.sprite_group
         self.objects = {
-            'tiles': [],
             'walls': [],
-            'enemies': [],
+            'ammo': [],
+            'health': [],
+            'cash': [],
+            'enemy': [],
+            'door': [],
+            'portal': [],
+            'player': player,
             'ui': [healthbar, game_over]
         }
-        world_height = len(self.world) * 48
-        world_width = 0
-        for y, row in enumerate(self.world):
-            world_width = max(world_width, len(row))
-            for x, s in enumerate(row):
-
-                if s == ' ':
-                    pass
-                elif s == '@':
-                    player.update_map_position((x, y))
-                    self.objects['player'] = player
-                    self.objects['tiles'].append(RogueTile((x, y), '.'))
-                elif s == '|' or s == '-':
-                    self.objects['walls'].append(RogueTile((x, y), s))
-                elif s == 'e':
-                    self.objects['enemies'].append(
-                        Enemy((x, y), self.world, player)
+        self.solid_objects = self.objects['walls'] + self.objects['enemy']
+        tiled_map = world.tiled_map
+        self.tiled_map = tiled_map
+        start_point = tiled_map.get_object_by_name('level0')
+        player.position = [start_point.x, start_point.y]
+        
+        tile_height = tiled_map.tileheight
+        tile_width = tiled_map.tilewidth
+        for x, y, gid in tiled_map.get_layer_by_name('floor'):
+            if gid in FLOOR_ID:
+                # print('wall:', x, y)
+                self.objects['walls'].append(
+                    pygame.Rect(
+                        x * tile_width, y * tile_height,
+                        tile_width, tile_height
                     )
-                    self.objects['tiles'].append(RogueTile((x, y), '.'))
-                else:
-                    self.objects['tiles'].append(RogueTile((x, y), s))
+                )
 
-        world_width *= 48
+        only_one = False
+        for tiled_object in tiled_map.objects:
+            # print(tiled_object.x, tiled_object.y, tiled_object.type)
+            rect = pygame.Rect(
+                tiled_object.x, tiled_object.y,
+                tiled_object.width, tiled_object.height
+            )
+            self.objects[tiled_object.type].append(rect)
+            
+            if tiled_object.type == 'enemy':
+                if not only_one:
+                    obj = Enemy(tiled_object.image, rect, tiled_map, player)
+                    only_one = True
+            else:
+                obj = GameObject(tiled_object.image, rect)
+            self.sprite_group.add(obj)
+            # if tiled_object.name == 'level0':
+            #     print(tiled_object.x, tiled_object.y)
+
+        self.sprite_group.add(player)
+        self.sprite_group.add(healthbar)
+
+        #world_width *= 48
         screen_width = 800
         screen_height = 600
 
-        def simple_camera_controller(camera: pygame.Vector2, target_rect: pygame.Rect) -> pygame.Vector2:
-            x = screen_width/2 - target_rect.centerx
-            y = screen_height/2 - target_rect.centery
-            return pygame.Vector2(x, y)
-            # return camera + (pygame.Vector2((x, y)) - camera) * 0.02
+        # def simple_camera_controller(
+        #         camera: pygame.Vector2,
+        #         target_rect: pygame.Rect) -> pygame.Vector2:
+        #     x = screen_width / 2 - target_rect.centerx
+        #     y = screen_height / 2 - target_rect.centery
+        #     return pygame.Vector2(x, y)
+        #     # return camera + (pygame.Vector2((x, y)) - camera) * 0.02
 
-        def complex_camera_controller(camera: pygame.Vector2, target_rect: pygame.Rect) -> pygame.Vector2:
-            x = screen_width/2 - target_rect.centerx
-            y = screen_height/2 - target_rect.centery
-            camera += (pygame.Vector2((x, y)) - camera) * 0.02
-            camera.x = max(-world_width + screen_width, min(0, camera.x))
-            camera.y = max(-world_height + screen_height, min(0, camera.y))
-            return camera
+        # def complex_camera_controller(
+        #         camera: pygame.Vector2,
+        #         target_rect: pygame.Rect) -> pygame.Vector2:
+        #     x = screen_width / 2 - target_rect.centerx
+        #     y = screen_height / 2 - target_rect.centery
+        #     camera += (pygame.Vector2((x, y)) - camera) * 0.02
+        #     camera.x = max(-world_width + screen_width, min(0, camera.x))
+        #     camera.y = max(-world_height + screen_height, min(0, camera.y))
+        #     return camera
 
-        self.camera = Camera(complex_camera_controller, world_width, world_height)
-        self.controller = ActionController()
-        self.controller.world = self.world
-        self.controller.objects = self.objects
-        self.controller.player = self.objects['player']
-        self.controller.tiles = self.objects['tiles']
-        self.controller.enemies = self.objects['enemies']
-        self.controller.game_over = next(x for x in self.objects['ui'] if isinstance(x, GameOver))
-        self.controller.walls = []
-        for tile in self.objects['walls']:
-            self.controller.walls.append(tile.rect)
-        self.controller.camera = self.camera
-
-    def link(self, engine):
-        engine.camera = self.camera
-        self.controller.set_engine(engine)
-        engine.add_scene('dungeon', self.objects, self.controller)
-        engine.show_scene('dungeon')
+        # self.camera = Camera(complex_camera_controller, world_width,
+        #                      world_height)
+        # self.controller.world = self.world
+        

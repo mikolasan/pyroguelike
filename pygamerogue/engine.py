@@ -12,22 +12,22 @@ class Engine:
         self.size = screen_size
         flags = 0#pygame.FULLSCREEN
         self.screen = pygame.display.set_mode(screen_size, flags)
-        self.scenes = {}
         self.fps = 60.0
         self.camera = Camera(lambda: True, screen_size[0], screen_size[1])
+        self.controllers = list()
 
-    def load(self, game):
-        game.link(self)
+    def add(self, controller):
+        self.controllers.append(controller)
+        controller.engine = self
 
-    def run(self, controller):
+    def run(self):
         self.playing = True
         clock = pygame.time.Clock()
         while self.playing:
+            dt = clock.tick(self.fps) / 1000.
             events = pygame.event.get()
-            controller.update(events)
-            self.update(events)
-            self.draw()
-            clock.tick(self.fps)
+            self.update(dt, events)
+            self.draw(self.screen, None)
             caption = "{} - FPS: {:.2f}".format(GAME_TITLE, clock.get_fps())
             pygame.display.set_caption(caption)
         pygame.quit()
@@ -36,40 +36,16 @@ class Engine:
         self.playing = False
 
     def reset(self):
-        for scene_name, scene in self.scenes.items():
-            scene['controller'].reset()
+        for c in self.controllers:
+            c.reset()
 
-    def update(self, events):
-        for scene_name, scene in self.scenes.items():
-            if scene['visibility']:
-                for obj in scene['objects'].values():
-                    if type(obj) is list:
-                        for o in obj:
-                            o.update(events)
-                    else:
-                        obj.update(events)
-                scene['controller'].update(events)
+    def update(self, dt, events):
+        for c in self.controllers:
+            c.update(dt, events)
 
-    def draw(self):
-        black = 0, 0, 0
-        self.screen.fill(black)
-        for scene_name, scene in self.scenes.items():
-            if scene['visibility']:
-                for obj in scene['objects'].values():
-                    if type(obj) is list:
-                        for o in obj:
-                            o.draw(self.screen, self.camera)
-                    else:
-                        obj.draw(self.screen, self.camera)
-                scene['controller'].draw(self.screen, self.camera)
-        pygame.display.update()
-
-    def add_scene(self, name, objects, controller):
-        self.scenes[name] = {
-            'objects': objects,
-            'controller': controller,
-            'visibility': False
-        }
-
-    def show_scene(self, name):
-        self.scenes[name]['visibility'] = True
+    def draw(self, screen, camera):
+        back = 14, 19, 25
+        screen.fill(back)
+        for c in self.controllers:
+            c.draw(screen, camera)
+        pygame.display.flip()

@@ -2,8 +2,10 @@ import math
 import pygame
 
 
-class HealthBar:
+class HealthBar(pygame.sprite.Sprite):
     def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.offset = (10, 10)
         self.pos = (10, 10)
         self.max_width = 200
         self.size = (self.max_width, 20)
@@ -20,24 +22,22 @@ class HealthBar:
         self.bar_rect = self.bar.get_rect()
         self.bar_rect.move_ip(self.pos)
 
+        self.image = self.bar
+        self.rect = self.bar_rect
+
     def inc_health(self, plus):
         self.health += plus
 
     def dec_health(self, minus):
         self.health -= minus
 
-    def update(self, events):
+    def update(self, dt):
+        self.bar_rect.left = self.pos[0] + self.offset[0]
+        self.bar_rect.top = self.pos[1] + self.offset[1]
         new_bar_rect = self.bar_rect.copy()
         new_bar_rect.width = math.floor((self.health / self.max_health) * self.max_width)
-        #self.bar.set_clip(new_bar_rect)
-        #print(self.bar_rect, new_bar_rect)
-
-    def draw(self, screen, camera):
-        #print(self.bg_rect, self.bar_rect)
-        #screen.blit(self.background, self.bg_rect)
         new_bar_rect = pygame.Rect((0, 0), self.size)
         new_bar_rect.width = math.floor((self.health / self.max_health) * self.max_width)
 
         self.bar.fill(self.bg_color)
         self.bar.fill(self.bar_color, rect=new_bar_rect)
-        screen.blit(self.bar, self.bar_rect)
