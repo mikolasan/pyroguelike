@@ -1,4 +1,3 @@
-import random
 import pygame
 from .enemy_pathfinder import EnemyPathfinder
 from pygamerogue.game_object import GameObject
@@ -11,12 +10,14 @@ class Enemy(GameObject):
         self.player = player
         self.damage = 10
         self.last_update = pygame.time.get_ticks()
-        self.update_delay = 500
-        self.ai = EnemyPathfinder(self.tiled_map)
+        self.update_delay = 300
+        self.ai = EnemyPathfinder(self.tiled_map, self._position)
 
     def path_to_player(self):
         start = (self.position[0] // 48, self.position[1] // 48)
         goal = (self.player.position[0] // 48, self.player.position[1] // 48)
+        if abs(start[0] - goal[0]) > 5 and abs(start[1] - goal[1]) > 5:
+            return None
         return self.ai.astar(start, goal)
 
     def show_path(self):
@@ -39,7 +40,6 @@ class Enemy(GameObject):
         self.rect.topleft = self._position
 
     def change_position(self):
-        print('change_position')
         dx = abs(self.rect.x - self.player.rect.x)
         dy = abs(self.rect.y - self.player.rect.y)
         if dx <= 48 and dy <= 48:

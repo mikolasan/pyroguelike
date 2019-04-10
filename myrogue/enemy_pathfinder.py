@@ -8,8 +8,10 @@ class EnemyPathfinder(AStar):
     represents a reachable position
     """
 
-    def __init__(self, tiled_map):
+    def __init__(self, tiled_map, position):
         self.tiled_map = tiled_map
+        self.position = position
+        self.radius = 5
         self.test_tile_wall = lambda x, y: self.tiled_map.layers[0].data[y][x] in [1,2]
         self.width = tiled_map.width
         self.height = tiled_map.height
@@ -26,7 +28,12 @@ class EnemyPathfinder(AStar):
         return 1
 
     def test_tile_normal(self, x, y):
-        return (0 <= x < self.width
+        r = self.radius
+        cx = self.position[0] // 48
+        cy = self.position[1] // 48
+        return (cx - r <= x < cx + r
+                and cy - r <= y < cy + r
+                and 0 <= x < self.width
                 and 0 <= y < self.height
                 and not self.test_tile_wall(x, y))
 

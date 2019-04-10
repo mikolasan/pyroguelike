@@ -9,6 +9,7 @@ class Engine:
         self.playing = False
         pygame.init()
         pygame.font.init()
+        # pygame.key.set_repeat(200, 100) # Doesn't work on repl.it
         self.size = screen_size
         flags = 0#pygame.FULLSCREEN
         self.screen = pygame.display.set_mode(screen_size, flags)

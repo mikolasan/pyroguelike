@@ -1,6 +1,8 @@
 import pygame
 from .enemy import Enemy
 from .game_over import GameOver
+from .ammobar import AmmoBar
+from .cashbar import CashBar
 from .healthbar import HealthBar
 from .world import World
 from pygamerogue.game_object import GameObject
@@ -11,10 +13,15 @@ FLOOR_ID = [1, 2]
 class TestGame(object):
     def __init__(self):
         game_over = GameOver()
+        ammobar = AmmoBar()
         healthbar = HealthBar()
+        cashbar = CashBar()
         player_image = pygame.image.load('player.png').convert()
         player = GameObject(player_image, player_image.get_rect())
+        player.pressed_keys = list()
         player.healthbar = healthbar
+        player.ammobar = ammobar
+        player.cashbar = cashbar
 
         def attacked(self, damage):
             self.healthbar.dec_health(damage)
@@ -38,7 +45,7 @@ class TestGame(object):
             'door': [],
             'portal': [],
             'player': player,
-            'ui': [healthbar, game_over]
+            'ui': [healthbar, ammobar, cashbar, game_over]
         }
         self.solid_objects = self.objects['walls'] + self.objects['enemy']
         tiled_map = world.tiled_map
@@ -78,6 +85,8 @@ class TestGame(object):
             #     print(tiled_object.x, tiled_object.y)
 
         self.sprite_group.add(player)
+        self.sprite_group.add(ammobar)
+        self.sprite_group.add(cashbar)
         self.sprite_group.add(healthbar)
 
         #world_width *= 48
