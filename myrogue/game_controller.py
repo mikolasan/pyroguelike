@@ -88,9 +88,9 @@ class GameController:
                 return True
         return False
 
-    def test_wall_collision(self, obj_rect):
+    def test_wall_collision(self, point):
         for wall in self.walls:
-            if obj_rect.colliderect(wall):
+            if wall.collidepoint(point):
                 return True
         return False
 
@@ -142,7 +142,7 @@ class GameController:
         if self.player.ammobar.ammo <= 0:
             return
         self.player.ammobar.dec_ammo(1)
-        bullet = Bullet(self.player.rect.center, self.player.angle)
+        bullet = Bullet(self.player.rect.center, self.player._angle)
         self.bullets.append(bullet)
         self.sprite_group.add(bullet, layer=self.bullets_layer_id)
 
@@ -188,7 +188,7 @@ class GameController:
         self.player.update(events)
         self.sprite_group.update(dt)
         for bullet in self.bullets:
-            if (self.test_wall_collision(bullet.rect)
+            if (self.test_wall_collision(bullet.rect.center)
                     or self.test_enemy_collision(bullet)):
                 bullet.kill()
 
@@ -231,7 +231,7 @@ class GameController:
                     self.player.pressed_keys.remove('down')
             elif event.type == pygame.MOUSEMOTION:
                 obj = self.player.rect
-                self.player.angle = calc_angle_rad(self.to_map_position(event.pos), (obj.centerx, obj.centery))
+                self.player._angle = calc_angle_rad(self.to_map_position(event.pos), (obj.centerx, obj.centery))
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 # print('click', event.pos)
                 # map_position = self.to_map_position(event.pos)

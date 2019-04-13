@@ -7,7 +7,7 @@ from pygamerogue.rogue_renderer import RogueRenderer
 
 class World(object):
     def __init__(self):
-        self.tiled_map = load_pygame('test2.tmx')
+        self.tiled_map = load_pygame('test3.tmx')
         map_data = pyscroll.data.TiledMapData(self.tiled_map)
         self.map_layer = RogueRenderer(map_data, [800, 600], clamp_camera=True, tall_sprites=0)
         self.map_layer._redraw_cutoff = 100

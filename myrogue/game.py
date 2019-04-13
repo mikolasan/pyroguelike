@@ -7,7 +7,7 @@ from .healthbar import HealthBar
 from .world import World
 from pygamerogue.game_object import GameObject
 
-FLOOR_ID = [1, 2]
+FLOOR_ID = [2]
 
 
 class TestGame(object):
@@ -16,7 +16,7 @@ class TestGame(object):
         ammobar = AmmoBar()
         healthbar = HealthBar()
         cashbar = CashBar()
-        player_image = pygame.image.load('player.png').convert()
+        player_image = pygame.image.load('player.png').convert_alpha()
         player = GameObject(player_image, player_image.get_rect())
         player.pressed_keys = list()
         player.healthbar = healthbar

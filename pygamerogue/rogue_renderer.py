@@ -1,3 +1,4 @@
+import pygame
 from pyscroll import BufferedRenderer
 
 
@@ -7,8 +8,10 @@ class RogueRenderer(BufferedRenderer):
         float numbers will be rounded.
         :param coords: (number, number)
         """
-        x, y = round(coords[0]), round(coords[1])
-        self.view_rect.center = x, y
+        vec = pygame.Vector2(coords[0], coords[1])
+        camera = pygame.Vector2(self.view_rect.center)
+        new_center = camera + (vec - camera) * 0.02
+        self.view_rect.center = (round(new_center.x), round(new_center.y))
 
         tw, th = self.data.tile_size
 
