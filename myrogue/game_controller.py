@@ -5,125 +5,155 @@ from pygamerogue.utils import shift_rect
 from .bullet import Bullet
 from .enemy import Enemy
 from .game import TestGame
-from .game_over import GameOver
-from .test_particles import TestParticles
+from .enemy_pieces import EnemyPieces
 
 
 ENEMY_SPAWN = pygame.USEREVENT
 PLAYER_REPEAT_KEY = pygame.USEREVENT + 1
+POSITIVE_DIALOG_RESULT = pygame.USEREVENT + 2
+NEGATIVE_DIALOG_RESULT = pygame.USEREVENT + 3
 
 
 class GameController:
     def __init__(self):
+        self.tile_size = 48
         game = TestGame()
         self.game = game
+        self.update_level()
+
+    def update_level(self):
+        game = self.game
         self.sprite_group = game.sprite_group
         self.objects = game.objects
         self.player = game.objects['player']
-        # self.hero = hero
-        # self.tiles = game.objects['tiles']
         self.enemies = game.objects['enemy']
-        self.game_over = next(
-            x for x in game.objects['ui'] if isinstance(x, GameOver))
-        self.walls = game.objects['walls']
-        # self.camera = game.camera
-        self.tile_size = 48
-
+        self.game_over = game.game_over
+        self.dialog = game.dialog
+        self.ui = game.ui_group
+        self.effects = []
+        
         last_layer_id = len(self.sprite_group.layers())
         self.bullets = self.sprite_group.get_sprites_from_layer(last_layer_id)
         self.bullets_layer_id = last_layer_id
-        #self.ask_new_enemy()
+        self.effects_layer_id = last_layer_id + 1
 
     def to_map_position(self, view_position):
         view_rect = self.game.map_layer.view_rect
         return [view_rect.x + view_position[0], view_rect.y + view_position[1]]
 
-    def test_tile(self, x, y, predicate):
-        return False
-
-    def test_tile_wall(self, rect):
-        #return self.test_tile(x, y, lambda: x == 'wall')
-        for wall in self.walls:
-            if rect.colliderect(wall):
+    def test_rect_collision(self, rect, obj_type, callback=None):
+        for i, obj_rect in enumerate(self.game.objects[obj_type]):
+            if rect.colliderect(obj_rect):
+                if callback is not None:
+                    callback(self, i)
                 return True
         return False
 
-    def test_tile_ammo(self, rect):
-        for i, ammo in enumerate(self.game.objects['ammo']):
-            if rect.colliderect(ammo):
-                n = 2
-                ammobar = self.player.ammobar
-                if ammobar.ammo < ammobar.max_ammo:
-                    ammobar.inc_ammo(n)
-                    sprites = self.sprite_group.get_sprites_at(rect.center)
-                    for sprite in sprites:
-                        sprite.kill()
-                    self.objects['ammo'].pop(i)
-                    return True
+    def test_center_collision(self, center, obj_type, callback=None):
+        for i, obj_rect in enumerate(self.game.objects[obj_type]):
+            if obj_rect.collidepoint(center):
+                if callback is not None:
+                    callback(self, i)
+                return True
         return False
 
-    def test_tile_cash(self, rect):
-        for i, cash in enumerate(self.game.objects['cash']):
-            if rect.colliderect(cash):
-                n = random.uniform(5, 20)
-                cashbar = self.player.cashbar
-                cashbar.inc_cash(n)
+    def test_wall_collision(self, rect):
+        return self.test_rect_collision(rect, 'walls')
+
+    def test_portal_collision(self, rect):
+        def change_level(self, i):
+            rect = self.game.objects['portal'][i]
+            sprites = self.sprite_group.get_sprites_at(rect.center)
+            if len(sprites) > 0:
+                level_id = sprites[0].level_id
+                self.game.world.set_current_level(level_id)
+                self.game.load_level()
+                self.update_level()
+
+        return self.test_rect_collision(rect, 'portal', change_level)
+
+    def test_npc_collision(self, rect):
+        def start_dialog(self, i):
+            rect = self.game.objects['NPC'][i]
+            sprites = self.sprite_group.get_sprites_at(rect.center)
+            if len(sprites) > 0:
+                dialog_id = sprites[0].dialog_id
+                self.dialog.start_for(dialog_id)
+                self.player.pressed_keys = list()
+
+        return self.test_rect_collision(rect, 'NPC', start_dialog)
+
+    def test_ammo_collision(self, rect):
+        def take_ammo(self, i):
+            n = 4
+            ammobar = self.player.ammobar
+            if ammobar.ammo < ammobar.max_ammo:
+                ammobar.inc_ammo(n)
                 sprites = self.sprite_group.get_sprites_at(rect.center)
                 for sprite in sprites:
                     sprite.kill()
-                self.game.objects['cash'].pop(i)
-                return True
-        return False
+                self.objects['ammo'].pop(i)
+        return self.test_rect_collision(rect, 'ammo', take_ammo)
 
-    def test_tile_health(self, rect):
-        for i, health in enumerate(self.game.objects['health']):
-            if rect.colliderect(health):
-                n = 10
-                cashbar = self.player.healthbar
-                cashbar.inc_health(n)
-                sprites = self.sprite_group.get_sprites_at(rect.center)
-                for sprite in sprites:
-                    sprite.kill()
-                self.game.objects['health'].pop(i)
-                return True
-        return False
+    def test_cash_collision(self, rect):
+        def take_cash(self, i):
+            n = random.uniform(5, 20)
+            cashbar = self.player.cashbar
+            cashbar.inc_cash(n)
+            sprites = self.sprite_group.get_sprites_at(rect.center)
+            for sprite in sprites:
+                sprite.kill()
+            self.game.objects['cash'].pop(i)
+        return self.test_rect_collision(rect, 'cash', take_cash)
 
-    def test_wall_collision(self, point):
-        for wall in self.walls:
-            if wall.collidepoint(point):
-                return True
-        return False
+    def test_medkit_collision(self, rect):
+        def take_medkit(self, i):
+            n = 10
+            healthbar = self.player.healthbar
+            healthbar.inc_health(n)
+            sprites = self.sprite_group.get_sprites_at(rect.center)
+            for sprite in sprites:
+                sprite.kill()
+            self.game.objects['health'].pop(i)
+        return self.test_rect_collision(rect, 'health', take_medkit)
+
+    def test_wall_center_collision(self, obj_center):
+        return self.test_center_collision(obj_center, 'walls')
+
+    def test_solid_tiles(self, rect):
+        return self.test_wall_collision(rect) or self.test_npc_collision(rect)
 
     def test_direction(self, direction):
         test_rect = self.player.rect.copy()
         test_rect = shift_rect(test_rect, direction)
-        return None if self.test_tile_wall(test_rect) else test_rect
+        return None if self.test_solid_tiles(test_rect) else test_rect
 
     def move_player(self, direction):
-        if direction is None:
-            i = 0
-            while i < len(self.player.pressed_keys):
-                direction = self.player.pressed_keys[i]
-                new_rect = self.test_direction(direction)
-                if new_rect:
-                    pygame.time.set_timer(PLAYER_REPEAT_KEY, 300)
-                    self.player.position = (new_rect.x, new_rect.y)
-                    self.test_tile_ammo(new_rect)
-                    self.test_tile_cash(new_rect)
-                    self.test_tile_health(new_rect)
-                    return
-                i += 1
-        else:
-            if self.player.pressed_keys.count(direction) > 0:
-                self.player.pressed_keys.remove(direction)
-            self.player.pressed_keys.append(direction)
+        if self.player.pressed_keys.count(direction) > 0:
+            self.player.pressed_keys.remove(direction)
+        self.player.pressed_keys.append(direction)
+        new_rect = self.test_direction(direction)
+        if new_rect:
+            self.on_player_move(new_rect)
+
+    def continue_players_movement(self):
+        # print('continue_players_movement')
+        i = 0
+        while i < len(self.player.pressed_keys):
+            direction = self.player.pressed_keys[i]
             new_rect = self.test_direction(direction)
             if new_rect:
-                pygame.time.set_timer(PLAYER_REPEAT_KEY, 150)
-                self.player.position = (new_rect.x, new_rect.y)
-                self.test_tile_ammo(new_rect)
-                self.test_tile_cash(new_rect)
-                self.test_tile_health(new_rect)
+                self.on_player_move(new_rect)
+                return
+            i += 1
+
+    def on_player_move(self, new_rect):
+        pygame.time.set_timer(PLAYER_REPEAT_KEY, 300)
+        self.player.position = (new_rect.x, new_rect.y)
+        self.test_ammo_collision(new_rect)
+        self.test_cash_collision(new_rect)
+        self.test_medkit_collision(new_rect)
+        self.test_portal_collision(new_rect)
 
     def left_key_pressed(self):
         self.move_player('left')
@@ -156,13 +186,18 @@ class GameController:
         self.enemies.append(new_enemy)
 
     def test_enemy_collision(self, bullet):
+        center = bullet.rect.center
         for i, enemy in enumerate(self.enemies):
-            if bullet.rect.colliderect(enemy):
-                # self.tiles.append(TestParticles(self.engine, enemy.rect.center, bullet.angle))
+            if enemy.collidepoint(center):
+                enemy_pos = enemy.center
                 sprites = self.sprite_group.get_sprites_at(enemy.center)
                 if len(sprites) > 0:
                     sprites[0].kill()
                 self.enemies.pop(i)
+
+                pieces = EnemyPieces(enemy_pos, bullet.angle)
+                self.sprite_group.add(pieces, layer=self.effects_layer_id)
+                # self.effects.append(pieces)
                 return True
         return False
 
@@ -176,26 +211,32 @@ class GameController:
             print('no sprites detected')
 
     def update(self, dt, events):
-        self.process_input(events)
-        # for bullet in self.bullets:
-        #     bullet.update(dt)
-        # self.camera.update(self.player)
         self.sprite_group.center(self.player.rect.center)
-        view_rect = self.game.map_layer.view_rect
-        self.player.ammobar.pos = (view_rect.right, view_rect.top)
-        self.player.cashbar.pos = (view_rect.left, view_rect.top)
-        self.player.healthbar.pos = (view_rect.left, view_rect.top)
         self.player.update(events)
         self.sprite_group.update(dt)
+        sprites = self.sprite_group.get_sprites_from_layer(self.effects_layer_id)
+        for sprite in sprites:
+            if sprite.over:
+                sprite.kill()
+
+        for obj in self.effects:
+            obj.update(dt)
+
+        self.ui.update(events)
+        if self.dialog.visible:
+            return
+
+        self.process_input(events)
         for bullet in self.bullets:
-            if (self.test_wall_collision(bullet.rect.center)
+            if (self.test_wall_center_collision(bullet.rect.center)
                     or self.test_enemy_collision(bullet)):
                 bullet.kill()
 
     def draw(self, screen, camera):
         self.sprite_group.draw(screen)
-        # for bullet in self.bullets:
-        #     bullet.draw(screen, camera)
+        for obj in self.effects:
+            obj.update(screen)
+        self.ui.draw(screen)
 
     def reset(self):
         hp = self.player.healthbar
@@ -248,4 +289,19 @@ class GameController:
                 self.ask_new_enemy()
             elif event.type == PLAYER_REPEAT_KEY:
                 if len(self.player.pressed_keys) > 0:
-                    self.move_player(None)
+                    print(self.player.pressed_keys)
+                    self.continue_players_movement()
+            elif event.type == POSITIVE_DIALOG_RESULT:
+                if self.dialog.name == 'Barman Joe':
+                    pass
+                elif self.dialog.name == 'Man in Black':
+                    # open portal
+                    tiled_object = self.game.tiled_map.get_object_by_name('Man in Black')
+                    point = (tiled_object.x + 1, tiled_object.y + 1)
+                    sprites = self.sprite_group.get_sprites_at(point)
+                    for sprite in sprites:
+                        sprite.kill()
+                        for i, rect in enumerate(self.objects['NPC']):
+                            if rect.collidepoint(point):
+                                self.objects['NPC'].pop(i)
+                                break

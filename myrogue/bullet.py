@@ -1,11 +1,13 @@
 import math
+import os
 import pygame
 from pygamerogue.game_object import GameObject
 
 
 class Bullet(GameObject):
     def __init__(self, position, angle):
-        image = pygame.image.load('bullet.png').convert()
+        path = os.path.join('resources', 'bullet.png')
+        image = pygame.image.load(path).convert()
         rect = image.get_rect().move(position)
         super().__init__(image, rect)
         self.speed = 5

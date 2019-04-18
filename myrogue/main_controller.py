@@ -13,3 +13,6 @@ class MainController:
 
     def draw(self, screen, camera):
         pass
+
+    def reset(self):
+        pass

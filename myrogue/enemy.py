@@ -23,11 +23,11 @@ class Enemy(GameObject):
     def show_path(self):
         path = self.path_to_player()
         if path is None:
-            print('IMPOSSIBLE')
+            pass
         else:
             start = (self.position[0] // 48, self.position[1] // 48)
             goal = (self.player.position[0] // 48, self.player.position[1] // 48)
-            print(start, goal, list(path))
+            # print(start, goal, list(path))
 
     def update(self, dt):
         delta = pygame.time.get_ticks() - self.last_update
@@ -48,7 +48,7 @@ class Enemy(GameObject):
         else:
             path = self.path_to_player()
             if path is None:
-                print('IMPOSSIBLE')
+                pass
             else:
                 path = list(path)
                 if len(path) > 2:
