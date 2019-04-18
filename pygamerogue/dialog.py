@@ -7,7 +7,7 @@ class Dialog(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.text_color = (50, 90, 90)
         self.selected_color = (50, 190, 90)
-        self.font = pygame.font.Font('font.ttf', 20)
+        self.font = pygame.font.Font('troika.ttf', 20)
         path = os.path.join('resources', 'dialog_back.png')
         self.back = pygame.image.load(path).convert()
         self.image = self.back.copy()
@@ -32,14 +32,19 @@ class Dialog(pygame.sprite.Sprite):
 
     def update_text(self):
         self.image.blit(self.back, [0, 0])
-        self.image.blit(self.question, [20, 20])
+        rect = self.display_name.get_rect()
+        rect.right = self.rect.right - 60
+        rect.top = 20
+        self.image.blit(self.display_name, rect)
+        self.image.blit(self.question, [20, 70])
         self.image.blit(self.selection, [0, 120 + self.selection_id * 65])
         self.answer1 = self.font.render(self.text1, True, self.selected_color if self.selection_id == 0 else self.text_color)
         self.answer2 = self.font.render(self.text2, True, self.selected_color if self.selection_id == 1 else self.text_color)
         self.image.blit(self.answer1, [20, 140])
         self.image.blit(self.answer2, [20, 205])
 
-    def show_question(self, question, answer1, answer2, answer1_cb, answer2_cb):
+    def show_question(self, name, question, answer1, answer2, answer1_cb, answer2_cb):
+        self.display_name = self.font.render(name, True, self.text_color)
         self.question = self.font.render(question, True, self.text_color)
         self.text1 = answer1
         self.text2 = answer2

@@ -17,7 +17,7 @@ class HealthBar(pygame.sprite.Sprite):
         self.background.fill(self.bg_color)
         self.bg_rect = self.background.get_rect()
         self.bg_rect.move_ip(self.pos)
-        self.font = pygame.font.Font('font.ttf', 20)
+        self.font = pygame.font.Font('troika.ttf', 20)
 
         self.bar = pygame.Surface(self.size)
         self.bar.fill(self.bar_color)

@@ -54,6 +54,90 @@ dialogs = {
             "I happy with my life", conversation_result_negative,
         ],
     ],
+    'Zero': [
+        [
+            # 0
+            "We just playing poker here",
+            "Can I join?", 1,
+            "Nevermind", conversation_is_over,
+        ],
+        [
+            # 1
+            "Who are you to be here?",
+            "I'm Jeff", conversation_is_over,
+            "Nobody", conversation_is_over,
+        ]
+    ],
+    'Gregory': [
+        [
+            # 0
+            "We just playing poker here",
+            "Can I join?", 1,
+            "Nevermind", conversation_is_over,
+        ],
+        [
+            # 1
+            "No, you can not.",
+            "OK", conversation_is_over,
+            "Bye", conversation_is_over,
+        ]
+    ],
+    'Edmund': [
+        [
+            # 0
+            "We just playing poker here",
+            "Can I join?", 1,
+            "Nevermind", conversation_is_over,
+        ],
+        [
+            # 1
+            "No, you can not.",
+            "OK", conversation_is_over,
+            "Bye", conversation_is_over,
+        ]
+    ],
+    'Roger': [
+        [
+            # 0
+            "We're just playing poker here",
+            "Can I join?", 1,
+            "Nevermind", conversation_is_over,
+        ],
+        [
+            # 1
+            "No.",
+            "OK", conversation_is_over,
+            "Bye", conversation_is_over,
+        ]
+    ],
+    'Jim': [
+        [
+            # 0
+            "We're just playing poker here",
+            "Can I join?", 1,
+            "Nevermind", conversation_is_over,
+        ],
+        [
+            # 1
+            "No, no, no.",
+            "OK", conversation_is_over,
+            "Bye", conversation_is_over,
+        ]
+    ],
+    'Elmo': [
+        [
+            # 0
+            "We're just playing poker here",
+            "Can I join?", 1,
+            "Nevermind", conversation_is_over,
+        ],
+        [
+            # 1
+            "I'm afraid not.",
+            "OK", conversation_is_over,
+            "Bye", conversation_is_over,
+        ]
+    ],
 }
 
 
@@ -84,4 +168,4 @@ class GameDialog(Dialog):
         answer1_cb = lambda: self.next_step(d[2])
         answer2 = d[3]
         answer2_cb = lambda: self.next_step(d[4])
-        self.show_question(question, answer1, answer2, answer1_cb, answer2_cb)
+        self.show_question(self.name, question, answer1, answer2, answer1_cb, answer2_cb)

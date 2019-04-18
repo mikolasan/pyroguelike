@@ -10,17 +10,31 @@ class World(object):
         self.levels = {
             'bar': {
                 'tmx_file': 'bar.tmx',
-                'start_point': 'entrance',
+                'start_points': ['entrance', 'poker room', 'level1'],
             },
-            'level0': {
-                'tmx_file': 'level0.tmx',
-                'start_point': 'bar',
+            'poker room': {
+                'tmx_file': 'poker_room.tmx',
+                'start_points': ['bar'],
+            },
+            'level1': {
+                'tmx_file': 'level1.tmx',
+                'start_points': ['bar', 'level2'],
+            },
+            'level2': {
+                'tmx_file': 'level2.tmx',
+                'start_points': ['level1', 'level3', 'level4'],
+            },
+            'level3': {
+                'tmx_file': 'level3.tmx',
+                'start_points': ['level2', 'final'],
             }
         }
         self.load_levels()
-        self.current_level = 'level0'
+        self.previous_level = None
+        self.current_level = 'bar'
 
     def set_current_level(self, name):
+        self.previous_level = self.current_level
         self.current_level = name
 
     def get_level_info(self, name=None):

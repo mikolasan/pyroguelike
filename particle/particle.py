@@ -15,7 +15,7 @@ class Particle(object):
         self.make_image(self.image)
         self.rect.center = self.pos
         self.real_center = list(self.pos)
-        self.vector = self.make_vector(self.speed, random.uniform(-1, 1) + self.angle)
+        self.vector = self.make_vector(self.speed, random.uniform(-2., 2.) + self.angle)
         self.dead = False
 
     def make_image(self, surface):

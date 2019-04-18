@@ -8,12 +8,12 @@ class CashBar(pygame.sprite.Sprite):
         self.pos = (0, 0)
         self.max_width = 250
         self.size = (self.max_width, 22)
-        self.max_cash = 100
-        self.cash = 0
+        self.max_cash = 500
+        self.cash = 10
         self.bg_color = (0, 40, 0)
 
         self.text_color = (0, 250, 0)
-        self.font = pygame.font.Font('font.ttf', 20)
+        self.font = pygame.font.Font('troika.ttf', 20)
         self.image = pygame.Surface(self.size)
         self.rect = self.image.get_rect()
 

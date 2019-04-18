@@ -1,11 +1,14 @@
+import os
 import random
 import pygame
+from pygamerogue.game_object import GameObject
 from pygamerogue.high_school import calc_angle_rad
 from pygamerogue.utils import shift_rect
 from .bullet import Bullet
 from .enemy import Enemy
 from .game import TestGame
 from .enemy_pieces import EnemyPieces
+from .npc_pieces import NpcPieces
 
 
 ENEMY_SPAWN = pygame.USEREVENT
@@ -24,9 +27,8 @@ class GameController:
     def update_level(self):
         game = self.game
         self.sprite_group = game.sprite_group
-        self.objects = game.objects
-        self.player = game.objects['player']
-        self.enemies = game.objects['enemy']
+        self.player = self.get_objects_by_type('player')
+        self.enemies = self.get_objects_by_type('enemy')
         self.game_over = game.game_over
         self.dialog = game.dialog
         self.ui = game.ui_group
@@ -37,12 +39,15 @@ class GameController:
         self.bullets_layer_id = last_layer_id
         self.effects_layer_id = last_layer_id + 1
 
+    def get_objects_by_type(self, obj_type):
+        return self.game.level_info[obj_type] if obj_type in self.game.level_info else []
+
     def to_map_position(self, view_position):
         view_rect = self.game.map_layer.view_rect
         return [view_rect.x + view_position[0], view_rect.y + view_position[1]]
 
     def test_rect_collision(self, rect, obj_type, callback=None):
-        for i, obj_rect in enumerate(self.game.objects[obj_type]):
+        for i, obj_rect in enumerate(self.get_objects_by_type(obj_type)):
             if rect.colliderect(obj_rect):
                 if callback is not None:
                     callback(self, i)
@@ -50,7 +55,7 @@ class GameController:
         return False
 
     def test_center_collision(self, center, obj_type, callback=None):
-        for i, obj_rect in enumerate(self.game.objects[obj_type]):
+        for i, obj_rect in enumerate(self.get_objects_by_type(obj_type)):
             if obj_rect.collidepoint(center):
                 if callback is not None:
                     callback(self, i)
@@ -62,7 +67,7 @@ class GameController:
 
     def test_portal_collision(self, rect):
         def change_level(self, i):
-            rect = self.game.objects['portal'][i]
+            rect = self.get_objects_by_type('portal')[i]
             sprites = self.sprite_group.get_sprites_at(rect.center)
             if len(sprites) > 0:
                 level_id = sprites[0].level_id
@@ -74,7 +79,7 @@ class GameController:
 
     def test_npc_collision(self, rect):
         def start_dialog(self, i):
-            rect = self.game.objects['NPC'][i]
+            rect = self.get_objects_by_type('NPC')[i]
             sprites = self.sprite_group.get_sprites_at(rect.center)
             if len(sprites) > 0:
                 dialog_id = sprites[0].dialog_id
@@ -92,29 +97,29 @@ class GameController:
                 sprites = self.sprite_group.get_sprites_at(rect.center)
                 for sprite in sprites:
                     sprite.kill()
-                self.objects['ammo'].pop(i)
+                self.get_objects_by_type('ammo').pop(i)
         return self.test_rect_collision(rect, 'ammo', take_ammo)
 
     def test_cash_collision(self, rect):
         def take_cash(self, i):
-            n = random.uniform(5, 20)
             cashbar = self.player.cashbar
-            cashbar.inc_cash(n)
             sprites = self.sprite_group.get_sprites_at(rect.center)
             for sprite in sprites:
+                n = sprite.amount if hasattr(sprite, 'amount') else 20
+                cashbar.inc_cash(n)
                 sprite.kill()
-            self.game.objects['cash'].pop(i)
+            self.get_objects_by_type('cash').pop(i)
         return self.test_rect_collision(rect, 'cash', take_cash)
 
     def test_medkit_collision(self, rect):
         def take_medkit(self, i):
-            n = 10
+            n = 20
             healthbar = self.player.healthbar
             healthbar.inc_health(n)
             sprites = self.sprite_group.get_sprites_at(rect.center)
             for sprite in sprites:
                 sprite.kill()
-            self.game.objects['health'].pop(i)
+            self.get_objects_by_type('health').pop(i)
         return self.test_rect_collision(rect, 'health', take_medkit)
 
     def test_wall_center_collision(self, obj_center):
@@ -185,7 +190,17 @@ class GameController:
         new_enemy = Enemy(world_pos, self.world, self.player)
         self.enemies.append(new_enemy)
 
-    def test_enemy_collision(self, bullet):
+    def add_loot(self, loot, pos):
+        for obj_type, amount in loot.items():
+            path = os.path.join('resources', 'cash.png')
+            image = pygame.image.load(path).convert_alpha()
+            rect = image.get_rect().move(pos)
+            self.game.save_object_rect(obj_type, rect)
+            obj = GameObject(image, rect)
+            obj.amount = amount
+            self.sprite_group.add(obj)
+
+    def test_bullet_in_enemy(self, bullet):
         center = bullet.rect.center
         for i, enemy in enumerate(self.enemies):
             if enemy.collidepoint(center):
@@ -197,7 +212,25 @@ class GameController:
 
                 pieces = EnemyPieces(enemy_pos, bullet.angle)
                 self.sprite_group.add(pieces, layer=self.effects_layer_id)
-                # self.effects.append(pieces)
+                return True
+        return False
+
+    def test_bullet_in_npc(self, bullet):
+        center = bullet.rect.center
+        level_npc = self.get_objects_by_type('NPC')
+        for i, npc in enumerate(level_npc):
+            if npc.collidepoint(center):
+                npc_pos = npc.center
+                sprites = self.sprite_group.get_sprites_at(npc.center)
+                if len(sprites) > 0:
+                    obj = sprites[0]
+                    if obj.loot:
+                        self.add_loot(obj.loot, npc.topleft)
+                    obj.kill()
+                level_npc.pop(i)
+
+                pieces = NpcPieces(npc_pos, bullet.angle)
+                self.sprite_group.add(pieces, layer=self.effects_layer_id)
                 return True
         return False
 
@@ -213,30 +246,34 @@ class GameController:
     def update(self, dt, events):
         self.sprite_group.center(self.player.rect.center)
         self.player.update(events)
-        self.sprite_group.update(dt)
-        sprites = self.sprite_group.get_sprites_from_layer(self.effects_layer_id)
-        for sprite in sprites:
+        self.sprite_group.update(events)
+        for sprite in self.sprite_group.get_sprites_from_layer(self.effects_layer_id):
             if sprite.over:
                 sprite.kill()
-
-        for obj in self.effects:
-            obj.update(dt)
 
         self.ui.update(events)
         if self.dialog.visible:
             return
 
+        if not self.game_over.visible and self.check_mission_status():
+            self.game_over.show('done')
         self.process_input(events)
-        for bullet in self.bullets:
+        for i, bullet in enumerate(self.bullets):
             if (self.test_wall_center_collision(bullet.rect.center)
-                    or self.test_enemy_collision(bullet)):
+                    or self.test_bullet_in_enemy(bullet)
+                    or self.test_bullet_in_npc(bullet)):
                 bullet.kill()
+                self.bullets.pop(i)
 
     def draw(self, screen, camera):
         self.sprite_group.draw(screen)
         for obj in self.effects:
             obj.update(screen)
         self.ui.draw(screen)
+
+    def check_mission_status(self):
+        return (self.player.cashbar.cash >= self.player.cashbar.max_cash
+                and self.game.world.current_level == 'bar')
 
     def reset(self):
         hp = self.player.healthbar
@@ -258,9 +295,6 @@ class GameController:
                     self.down_key_pressed()
                 elif event.key == pygame.K_f:
                     self.shoot_key_pressed()
-                elif event.key == pygame.K_RETURN:
-                    if self.game_over.visible:
-                        self.engine.reset()
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_a:
                     self.player.pressed_keys.remove('left')
@@ -289,11 +323,11 @@ class GameController:
                 self.ask_new_enemy()
             elif event.type == PLAYER_REPEAT_KEY:
                 if len(self.player.pressed_keys) > 0:
-                    print(self.player.pressed_keys)
+                    # print(self.player.pressed_keys)
                     self.continue_players_movement()
             elif event.type == POSITIVE_DIALOG_RESULT:
                 if self.dialog.name == 'Barman Joe':
-                    pass
+                    self.player.cashbar.dec_cash(7)  # pay for beer
                 elif self.dialog.name == 'Man in Black':
                     # open portal
                     tiled_object = self.game.tiled_map.get_object_by_name('Man in Black')
@@ -301,7 +335,7 @@ class GameController:
                     sprites = self.sprite_group.get_sprites_at(point)
                     for sprite in sprites:
                         sprite.kill()
-                        for i, rect in enumerate(self.objects['NPC']):
+                        for i, rect in enumerate(self.get_objects_by_type('NPC')):
                             if rect.collidepoint(point):
-                                self.objects['NPC'].pop(i)
+                                self.get_objects_by_type('NPC').pop(i)
                                 break

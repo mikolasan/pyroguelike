@@ -3,7 +3,7 @@ import pygame as pg
 from particle import Emitter
 
 
-class EnemyPieces(pg.sprite.Sprite):
+class NpcPieces(pg.sprite.Sprite):
     def __init__(self, pos, angle):
         pg.sprite.Sprite.__init__(self)
         self.image = pg.Surface((300, 300), flags=pg.SRCALPHA)
@@ -25,10 +25,9 @@ class EnemyPieces(pg.sprite.Sprite):
             'texture': self.square,
             'angle': self.angle,
             'speed': (0.7, 0.9),
-            'size': (1, 20),
+            'size': (3, 15),
             'life_span': 0.7,
-            'start_color': (225, 180, 21),
-            'end_color': (0, 180, 21, 0)
+            'start_color': (67, 6, 6)
         }
         slots = 10
         return Emitter(center_pos, slots, **kwarg_dict)
