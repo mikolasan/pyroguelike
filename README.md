@@ -2,26 +2,49 @@
 
 ## Install requirements
 
+### Pygame
+
+**Arch / Manjaro**
+
 ```
-pip install pygame==1.9.5
+sudo pacman -S python-pygame
+```
+
+in all other cases (Ubuntu, Windows, etc)
+```
+pip install pygame==1.9.6
+```
+
+### Other dependencies
+
+```
 pip install -r requirements.txt
 ```
 
-## And run
+## Run
 
 ```
 python main.py
 ```
 
+## Release
+
+```
+pip install pyinstaller
+pyinstaller main.py
+```
+
+---
+
 ## Game Intro
 
 What a day it had been!
 
-Jeff got fired from Burger Queen restaurant today. 
+Jeff got fired from Burger Queen restaurant today.
 This week he needs to pay mortgage loan for her grandmother house and for cable TV just before a baseball season.
 
-Considering all this stuff together Jeff decides to go to a bar. 
-To watch the first game, drink some beer and think about future and where to get some cash. 
+Considering all this stuff together Jeff decides to go to a bar.
+To watch the first game, drink some beer and think about future and where to get some cash.
 Collect $500 or more this night and life will become less miserable.
 
 ## Controls
@@ -54,13 +77,13 @@ They boosted my productivity with this project in the platform usage.
 * Stop button usually does not work. To restart code with new changes use Ctrl+Enter. Make sure focus in the code editor.
 * Also try Ctrl+C in console window.
 * If first methods do not help, close a browser tab and open repl.it, go to your dashboard and open project again.
-* Sometimes it still displays window from previous start or do not display an app at all. 
-  It happened to me when the package manager (pip) tells you who is the boss. Then fork a project. 
+* Sometimes it still displays window from previous start or do not display an app at all.
+  It happened to me when the package manager (pip) tells you who is the boss. Then fork a project.
   When I discovered that method I finished with 11 forks of my game.
 * You cannot open just a game in new tab using *.run link. You have to play with editor layout a whole day.
 * I recommend to run your app in fullscreen mode to prevent from clicking on close and minimize buttons of the app window
-* Linter tells you about every whitespace error and very often covers real syntax errors. 
-  Do you know that there is auto-format button near to "saved" status? 
+* Linter tells you about every whitespace error and very often covers real syntax errors.
+  Do you know that there is auto-format button near to "saved" status?
   I want an option to make it automatic on save (merge it with my habit to press Ctrl+S every minute)
 * pdb module does not work. I tried pdb_clone and it worked.
 * Do not remove file if it is currently opened.
