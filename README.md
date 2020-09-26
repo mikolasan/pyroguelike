@@ -1,25 +1,31 @@
 # Not your father's roguelike
 
-## Install requirements
+[![GitHub license](https://img.shields.io/github/license/mikolasan/pyroguelike)](https://github.com/mikolasan/pyroguelike/blob/master/LICENSE)
 
-### Pygame
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/be99136b390a43e395e917190831647c)](https://www.codacy.com/manual/SaturdaysCode/pyroguelike/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mikolasan/pyroguelike&amp;utm_campaign=Badge_Grade)
+[![Maintainability](https://api.codeclimate.com/v1/badges/ec7ad611258839e926a7/maintainability)](https://codeclimate.com/github/mikolasan/pyroguelike/maintainability)
 
-**Arch / Manjaro**
+## Install
+
+`Pygame` on **Arch / Manjaro**
 
 ```
 sudo pacman -S python-pygame
 ```
 
-in all other cases (Ubuntu, Windows, etc)
+`Pygame` in all other cases (**Ubuntu, Windows**, etc)
+
 ```
 pip install pygame==1.9.6
 ```
 
-### Other dependencies
+Then install other dependencies
 
 ```
 pip install -r requirements.txt
 ```
+
+_Note_: `Pygame` is not included into requirements, because of specifics of Repl.it service when `Pygame` is selected as a framework.
 
 ## Run
 
@@ -36,7 +42,13 @@ pyinstaller main.py
 
 ---
 
-## Game Intro
+### Controls
+
+* Movements: `w` `a` `s` `d` - move a hero up, left, down, or right
+* Use mouse pointer and left button to shoot (when you have ammo).
+* Dialog system: `Enter` - to select your answer, `w`/`s` - up and down to choose another answer.
+
+### Game Intro
 
 What a day it had been!
 
@@ -47,19 +59,13 @@ Considering all this stuff together Jeff decides to go to a bar.
 To watch the first game, drink some beer and think about future and where to get some cash.
 Collect $500 or more this night and life will become less miserable.
 
-## Controls
+### Preview
 
-* Movements: `w` `a` `s` `d` - move a hero up, left, down, or right
-* Use mouse pointer and left button to shoot (when you have ammo).
-* Dialog system: `Enter` - to select your answer, `w`/`s` - up and down to choose another answer.
-
-## Preview
-
-![screen1](https://storage.googleapis.com/replit/images/1555560839579_d796ad540bdb72f9e5c95849ee6c2aa8.pn)
+<img src="https://storage.googleapis.com/replit/images/1555560839579_d796ad540bdb72f9e5c95849ee6c2aa8.pn" width="500">
 
 *Screen 1 - Jeff talks with barman Joe*
 
-![screen2](https://storage.googleapis.com/replit/images/1555560839888_fe9969e4ad98ab91f1e49d33ed248827.pn)
+<img src="https://storage.googleapis.com/replit/images/1555560839888_fe9969e4ad98ab91f1e49d33ed248827.pn" width="500">
 
 *Screen 2 - Clearing a base from strange yellow creatures with red eyes*
 
@@ -68,7 +74,7 @@ Collect $500 or more this night and life will become less miserable.
 *Screenplay (with music!)*
 
 
-## About Repl.it Gam Jam
+### About Repl.it Gam Jam
 
 I'd like to share my experience with pygame on [replit](https://repl.it/@stakanmartini/test-roguelike-11)
 with other programmers. Here are my notes I made when started with this project.
@@ -87,3 +93,12 @@ They boosted my productivity with this project in the platform usage.
   I want an option to make it automatic on save (merge it with my habit to press Ctrl+S every minute)
 * pdb module does not work. I tried pdb_clone and it worked.
 * Do not remove file if it is currently opened.
+
+
+## Building community 
+
+Ask me anything, leave a comment, suggest incredible feature
+
+[![Gitter](https://badges.gitter.im/pyroguelike/community.svg)](https://gitter.im/pyroguelike/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![YouTube](https://img.shields.io/badge/video-YouTube-critical)](https://www.youtube.com/watch?v=VqfjrGS7Ukw)
+[![GitHub issues](https://img.shields.io/github/issues/mikolasan/pyroguelike)](https://github.com/mikolasan/pyroguelike/issues)
