@@ -8,14 +8,15 @@ class Enemy(GameObject):
         super().__init__(image, rect)
         self.tiled_map = tiled_map
         self.player = player
+        self.tile_size
         self.damage = 10
         self.last_update = pygame.time.get_ticks()
         self.update_delay = 300
         self.ai = EnemyPathfinder(self.tiled_map, self._position)
 
     def path_to_player(self):
-        start = (self.position[0] // 48, self.position[1] // 48)
-        goal = (self.player.position[0] // 48, self.player.position[1] // 48)
+        start = (self.position[0] // self.tile_size, self.position[1] // self.tile_size)
+        goal = (self.player.position[0] // self.tile_size, self.player.position[1] // self.tile_size)
         if abs(start[0] - goal[0]) > 5 and abs(start[1] - goal[1]) > 5:
             return None
         return self.ai.astar(start, goal)
@@ -25,8 +26,8 @@ class Enemy(GameObject):
         if path is None:
             pass
         else:
-            start = (self.position[0] // 48, self.position[1] // 48)
-            goal = (self.player.position[0] // 48, self.player.position[1] // 48)
+            start = (self.position[0] // self.tile_size, self.position[1] // self.tile_size)
+            goal = (self.player.position[0] // self.tile_size, self.player.position[1] // self.tile_size)
             # print(start, goal, list(path))
 
     def update(self, dt):
@@ -42,7 +43,7 @@ class Enemy(GameObject):
     def change_position(self):
         dx = abs(self.rect.x - self.player.rect.x)
         dy = abs(self.rect.y - self.player.rect.y)
-        if dx <= 48 and dy <= 48:
+        if dx <= self.tile_size and dy <= self.tile_size:
             self.last_update = pygame.time.get_ticks()
             return
         else:
@@ -53,7 +54,7 @@ class Enemy(GameObject):
                 path = list(path)
                 if len(path) > 2:
                     cell = path[1]
-                    self.position = tuple(x * 48 for x in cell)
+                    self.position = tuple(x * self.tile_size for x in cell)
                 else:
                     print('i\'ll stay')
 
@@ -62,5 +63,5 @@ class Enemy(GameObject):
     def attack_player(self):
         dx = abs(self.rect.x - self.player.rect.x)
         dy = abs(self.rect.y - self.player.rect.y)
-        if dx <= 48 and dy <= 48:
+        if dx <= self.tile_size and dy <= self.tile_size:
             self.player.attacked(self.player, self.damage)

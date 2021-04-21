@@ -1,7 +1,7 @@
 import pygame
 
 
-class MainController:
+class ExitController:
     def __init__(self):
         pass
 

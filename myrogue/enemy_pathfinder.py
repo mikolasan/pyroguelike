@@ -12,6 +12,7 @@ class EnemyPathfinder(AStar):
         self.tiled_map = tiled_map
         self.position = position
         self.radius = 5
+        self.tile_size = 16
         self.test_tile_wall = lambda x, y: self.tiled_map.layers[0].data[y][x] in [1,2]
         self.width = tiled_map.width
         self.height = tiled_map.height
@@ -29,8 +30,8 @@ class EnemyPathfinder(AStar):
 
     def test_tile_normal(self, x, y):
         r = self.radius
-        cx = self.position[0] // 48
-        cy = self.position[1] // 48
+        cx = self.position[0] // self.tile_size
+        cy = self.position[1] // self.tile_size
         return (cx - r <= x < cx + r
                 and cy - r <= y < cy + r
                 and 0 <= x < self.width

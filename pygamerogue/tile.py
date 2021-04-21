@@ -1,7 +1,7 @@
 import pygame
 
-
-rogue_size = (48, 48)
+tile_size = 16
+rogue_size = (tile_size, tile_size)
 
 
 def map_to_pixel(x, y):
@@ -48,7 +48,7 @@ class Tile:
         self.rect = self.image.get_rect()
         self.update_rect_position()
 
-    def update(self, events):
+    def update(self):
         self.update_rect_position()
 
     def draw(self, screen, camera):

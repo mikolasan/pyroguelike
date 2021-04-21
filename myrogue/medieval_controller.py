@@ -6,7 +6,7 @@ from pygamerogue.high_school import calc_angle_rad
 from pygamerogue.utils import shift_rect
 from .bullet import Bullet
 from .enemy import Enemy
-from .game import TestGame
+from .new_game import NewGame
 from .enemy_pieces import EnemyPieces
 from .npc_pieces import NpcPieces
 
@@ -17,10 +17,10 @@ POSITIVE_DIALOG_RESULT = pygame.USEREVENT + 2
 NEGATIVE_DIALOG_RESULT = pygame.USEREVENT + 3
 
 
-class GameController:
+class MedievalController:
     def __init__(self):
-        self.tile_size = 48
-        game = TestGame()
+        self.tile_size = 16
+        game = NewGame()
         self.game = game
         self.update_level()
 
@@ -141,8 +141,8 @@ class GameController:
         if new_rect:
             self.on_player_move(new_rect)
 
-    def continue_players_movement(self):
-        # print('continue_players_movement')
+    def continue_player_movement(self):
+        # print('continue_player_movement')
         i = 0
         while i < len(self.player.pressed_keys):
             direction = self.player.pressed_keys[i]
@@ -151,10 +151,14 @@ class GameController:
                 self.on_player_move(new_rect)
                 return
             i += 1
+        
+    def stop_player_movement(self):
+        self.player.stop_movement()
 
     def on_player_move(self, new_rect):
         pygame.time.set_timer(PLAYER_REPEAT_KEY, 300)
         self.player.position = (new_rect.x, new_rect.y)
+        self.player.start_movement()
         self.test_ammo_collision(new_rect)
         self.test_cash_collision(new_rect)
         self.test_medkit_collision(new_rect)
@@ -245,7 +249,7 @@ class GameController:
 
     def update(self, dt, events):
         self.sprite_group.center(self.player.rect.center)
-        self.player.update(events)
+        self.player.update(dt)
         self.sprite_group.update(events)
         for sprite in self.sprite_group.get_sprites_from_layer(self.effects_layer_id):
             if sprite.over:
@@ -308,15 +312,6 @@ class GameController:
                 obj = self.player.rect
                 self.player._angle = calc_angle_rad(self.to_map_position(event.pos), (obj.centerx, obj.centery))
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                # print('click', event.pos)
-                # map_position = self.to_map_position(event.pos)
-                # print('on map', map_position)
-                # for enemy in self.enemies:
-                #     if enemy.collidepoint(map_position):
-                #         layer_x = enemy.x // self.tile_size
-                #         layer_y = enemy.y // self.tile_size
-                #         print('collide with:', enemy, layer_x, layer_y)
-                #         self.show_enemys_path(map_position)
                 self.shoot_key_pressed()
             elif event.type == ENEMY_SPAWN:
                 self.spawn_enemy()
@@ -324,18 +319,6 @@ class GameController:
             elif event.type == PLAYER_REPEAT_KEY:
                 if len(self.player.pressed_keys) > 0:
                     # print(self.player.pressed_keys)
-                    self.continue_players_movement()
-            elif event.type == POSITIVE_DIALOG_RESULT:
-                if self.dialog.name == 'Barman Joe':
-                    self.player.cashbar.dec_cash(7)  # pay for beer
-                elif self.dialog.name == 'Man in Black':
-                    # open portal
-                    tiled_object = self.game.tiled_map.get_object_by_name('Man in Black')
-                    point = (tiled_object.x + 1, tiled_object.y + 1)
-                    sprites = self.sprite_group.get_sprites_at(point)
-                    for sprite in sprites:
-                        sprite.kill()
-                        for i, rect in enumerate(self.get_objects_by_type('NPC')):
-                            if rect.collidepoint(point):
-                                self.get_objects_by_type('NPC').pop(i)
-                                break
+                    self.continue_player_movement()
+                else:
+                    self.stop_player_movement()
