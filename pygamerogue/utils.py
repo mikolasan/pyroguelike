@@ -1,4 +1,4 @@
-def shift_rect(rect, direction, distance=48):
+def shift_rect(rect, direction, distance):
     if direction == 'left':
         rect.left -= distance
     elif direction == 'right':

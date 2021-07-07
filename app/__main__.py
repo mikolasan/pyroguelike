@@ -1,15 +1,17 @@
 #!/usr/bin/env python
 
 from pygamerogue.engine import Engine
+from myrogue.medieval_controller import MedievalController
 from myrogue.game_controller import GameController
-from myrogue.main_controller import MainController
+from myrogue.exit_controller import ExitController
 
 
 def main():
     size = (800, 600)
     engine = Engine(size)
-    engine.add(GameController())
-    engine.add(MainController())
+    engine.add(MedievalController())
+    # engine.add(GameController())
+    engine.add(ExitController())
     engine.run()
 
 
